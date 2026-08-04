@@ -1,7 +1,46 @@
-import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import nodemailer from "nodemailer";
+import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
+
+type Locale = "es" | "en";
+
+const SERVICE_LABELS = {
+  landing: { es: "Landing page", en: "Landing page" },
+  ecommerce: { es: "Ecommerce", en: "Ecommerce" },
+  web_app: { es: "Aplicación web o MVP", en: "Web application or MVP" },
+  sales_automation: {
+    es: "Sistema para ventas",
+    en: "Sales system",
+  },
+  automation_ai: {
+    es: "Automatización e IA",
+    en: "Automation and AI",
+  },
+  infrastructure: {
+    es: "Infraestructura digital",
+    en: "Digital infrastructure",
+  },
+  consulting: {
+    es: "Consultoría tecnológica",
+    en: "Technology consulting",
+  },
+  other: { es: "Otra necesidad", en: "Another need" },
+} as const;
+
+type ServiceId = keyof typeof SERVICE_LABELS;
+
+const PAGE_IDS = new Set([
+  "home",
+  "services",
+  "ecommerce",
+  "sales",
+  "automations",
+  "pricing",
+  "faq",
+  "contact",
+]);
 
 type ContactPayload = {
   name?: unknown;
@@ -12,27 +51,92 @@ type ContactPayload = {
   message?: unknown;
   website?: unknown;
   consent?: unknown;
+  locale?: unknown;
+  page?: unknown;
 };
+
+type ContactErrorCode =
+  | "INVALID_FORM"
+  | "TOO_LARGE"
+  | "RATE_LIMITED"
+  | "SMTP_UNAVAILABLE"
+  | "SEND_FAILED";
 
 type RateLimitEntry = {
   count: number;
   expiresAt: number;
 };
 
-const rateLimits = new Map<string, RateLimitEntry>();
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000;
+const MAX_BODY_BYTES = 24 * 1024;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_MAX_ENTRIES = 5_000;
+const RATE_LIMIT_CLEANUP_INTERVAL_MS = 60 * 1000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALLOWED_SERVICES = new Set([
-  "Aplicación web",
-  "Automatización e IA",
-  "Infraestructura digital",
-  "Consultoría",
-  "Otro",
+const JSON_CONTENT_TYPE = "application/json";
+const PRODUCTION_ORIGINS = new Set([
+  "https://sosdev.com.co",
+  "https://www.sosdev.com.co",
 ]);
+const DEVELOPMENT_ORIGINS = new Set([
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+]);
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, max-age=0",
+};
 
-function cleanText(value: unknown, maxLength: number) {
-  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+const rateLimits = new Map<string, RateLimitEntry>();
+let nextRateLimitCleanupAt = 0;
+
+function successResponse() {
+  return NextResponse.json(
+    { ok: true as const },
+    { status: 200, headers: NO_STORE_HEADERS },
+  );
+}
+
+function errorResponse(
+  code: ContactErrorCode,
+  status: number,
+  headers: Record<string, string> = {},
+) {
+  return NextResponse.json(
+    { ok: false as const, code },
+    {
+      status,
+      headers: {
+        ...NO_STORE_HEADERS,
+        ...headers,
+      },
+    },
+  );
+}
+
+function cleanSingleLine(value: unknown, maxLength: number) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength)
+    .trim();
+}
+
+function cleanMultiline(value: unknown, maxLength: number) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
+    .trim()
+    .slice(0, maxLength)
+    .trim();
 }
 
 function escapeHtml(value: string) {
@@ -49,85 +153,281 @@ function escapeHtml(value: string) {
   );
 }
 
-function getClientIp(request: NextRequest) {
-  return (
-    request.headers.get("cf-connecting-ip") ||
-    request.headers.get("x-real-ip") ||
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "unknown"
-  );
+function isLocale(value: string): value is Locale {
+  return value === "es" || value === "en";
 }
 
-function isRateLimited(ip: string) {
-  const now = Date.now();
-  const current = rateLimits.get(ip);
+function isServiceId(value: string): value is ServiceId {
+  return Object.prototype.hasOwnProperty.call(SERVICE_LABELS, value);
+}
 
-  if (!current || current.expiresAt <= now) {
-    rateLimits.set(ip, {
-      count: 1,
-      expiresAt: now + RATE_LIMIT_WINDOW,
-    });
+function normalizeOrigin(value: string) {
+  try {
+    const url = new URL(value);
+
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return null;
+    }
+
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+function getConfiguredOrigins() {
+  return (process.env.CONTACT_ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => normalizeOrigin(origin.trim()))
+    .filter((origin): origin is string => Boolean(origin));
+}
+
+function hasAllowedOrigin(request: NextRequest) {
+  const originHeader = request.headers.get("origin");
+
+  if (!originHeader) {
+    return process.env.NODE_ENV !== "production";
+  }
+
+  const origin = normalizeOrigin(originHeader);
+
+  if (!origin) {
     return false;
   }
 
-  if (current.count >= RATE_LIMIT_MAX) {
+  if (PRODUCTION_ORIGINS.has(origin)) {
     return true;
   }
 
+  if (
+    process.env.NODE_ENV !== "production" &&
+    DEVELOPMENT_ORIGINS.has(origin)
+  ) {
+    return true;
+  }
+
+  return getConfiguredOrigins().includes(origin);
+}
+
+function hasJsonContentType(request: NextRequest) {
+  const contentType = request.headers
+    .get("content-type")
+    ?.split(";", 1)[0]
+    ?.trim()
+    .toLowerCase();
+
+  return contentType === JSON_CONTENT_TYPE;
+}
+
+function getDeclaredBodyLength(request: NextRequest) {
+  const contentLength = request.headers.get("content-length");
+
+  if (contentLength === null) {
+    return null;
+  }
+
+  if (!/^\d+$/.test(contentLength)) {
+    return Number.NaN;
+  }
+
+  return Number(contentLength);
+}
+
+async function readBodyWithinLimit(request: NextRequest) {
+  if (!request.body) {
+    return { tooLarge: false as const, text: "" };
+  }
+
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let totalBytes = 0;
+  let text = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      break;
+    }
+
+    totalBytes += value.byteLength;
+
+    if (totalBytes > MAX_BODY_BYTES) {
+      await reader.cancel().catch(() => undefined);
+      return { tooLarge: true as const, text: "" };
+    }
+
+    text += decoder.decode(value, { stream: true });
+  }
+
+  text += decoder.decode();
+  return { tooLarge: false as const, text };
+}
+
+function getClientIp(request: NextRequest) {
+  const ip =
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-real-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown";
+
+  return ip.trim().slice(0, 128) || "unknown";
+}
+
+function getRateLimitKey(request: NextRequest) {
+  return createHash("sha256").update(getClientIp(request)).digest("base64url");
+}
+
+function pruneRateLimits(now: number) {
+  if (
+    now < nextRateLimitCleanupAt &&
+    rateLimits.size < RATE_LIMIT_MAX_ENTRIES
+  ) {
+    return;
+  }
+
+  for (const [key, entry] of rateLimits) {
+    if (entry.expiresAt <= now) {
+      rateLimits.delete(key);
+    }
+  }
+
+  while (rateLimits.size >= RATE_LIMIT_MAX_ENTRIES) {
+    const oldestKey = rateLimits.keys().next().value;
+
+    if (oldestKey === undefined) {
+      break;
+    }
+
+    rateLimits.delete(oldestKey);
+  }
+
+  nextRateLimitCleanupAt = now + RATE_LIMIT_CLEANUP_INTERVAL_MS;
+}
+
+function consumeRateLimit(key: string) {
+  const now = Date.now();
+  pruneRateLimits(now);
+
+  const current = rateLimits.get(key);
+
+  if (!current || current.expiresAt <= now) {
+    rateLimits.set(key, {
+      count: 1,
+      expiresAt: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return { limited: false as const, retryAfterSeconds: 0 };
+  }
+
+  if (current.count >= RATE_LIMIT_MAX) {
+    return {
+      limited: true as const,
+      retryAfterSeconds: Math.max(
+        1,
+        Math.ceil((current.expiresAt - now) / 1000),
+      ),
+    };
+  }
+
   current.count += 1;
-  return false;
+  return { limited: false as const, retryAfterSeconds: 0 };
+}
+
+function getSmtpErrorCode(error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof error.code === "string"
+  ) {
+    return error.code.slice(0, 60);
+  }
+
+  return "UNKNOWN";
 }
 
 export async function POST(request: NextRequest) {
-  const ip = getClientIp(request);
+  if (!hasJsonContentType(request)) {
+    return errorResponse("INVALID_FORM", 415);
+  }
 
-  if (isRateLimited(ip)) {
-    return NextResponse.json(
-      {
-        message:
-          "Se alcanzó el límite temporal de mensajes. Puede escribirnos por WhatsApp.",
-      },
-      { status: 429 },
-    );
+  if (!hasAllowedOrigin(request)) {
+    return errorResponse("INVALID_FORM", 403);
+  }
+
+  const declaredBodyLength = getDeclaredBodyLength(request);
+
+  if (Number.isNaN(declaredBodyLength)) {
+    return errorResponse("INVALID_FORM", 400);
+  }
+
+  if (
+    declaredBodyLength !== null &&
+    declaredBodyLength > MAX_BODY_BYTES
+  ) {
+    return errorResponse("TOO_LARGE", 413);
   }
 
   let payload: ContactPayload;
 
   try {
-    payload = (await request.json()) as ContactPayload;
+    const body = await readBodyWithinLimit(request);
+
+    if (body.tooLarge) {
+      return errorResponse("TOO_LARGE", 413);
+    }
+
+    const parsed = JSON.parse(body.text) as unknown;
+
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      return errorResponse("INVALID_FORM", 400);
+    }
+
+    payload = parsed as ContactPayload;
   } catch {
-    return NextResponse.json(
-      { message: "La información enviada no es válida." },
-      { status: 400 },
-    );
+    return errorResponse("INVALID_FORM", 400);
   }
 
-  const name = cleanText(payload.name, 90);
-  const company = cleanText(payload.company, 100);
-  const email = cleanText(payload.email, 180).toLowerCase();
-  const phone = cleanText(payload.phone, 30);
-  const service = cleanText(payload.service, 80);
-  const message = cleanText(payload.message, 3000);
-  const website = cleanText(payload.website, 200);
-  const consent = cleanText(payload.consent, 20);
+  const website = cleanSingleLine(payload.website, 200);
 
   if (website) {
-    return NextResponse.json({
-      message: "Mensaje enviado. Nuestro equipo se pondrá en contacto pronto.",
-    });
+    return successResponse();
   }
 
+  const name = cleanSingleLine(payload.name, 100);
+  const company = cleanSingleLine(payload.company, 120);
+  const email = cleanSingleLine(payload.email, 254).toLowerCase();
+  const phone = cleanSingleLine(payload.phone, 40);
+  const service = cleanSingleLine(payload.service, 80);
+  const message = cleanMultiline(payload.message, 4000);
+  const consent =
+    payload.consent === true ||
+    cleanSingleLine(payload.consent, 20) === "accepted";
+  const locale = cleanSingleLine(payload.locale, 5);
+  const page = cleanSingleLine(payload.page, 30);
+
   if (
-    !name ||
+    name.length < 2 ||
     !EMAIL_PATTERN.test(email) ||
-    !ALLOWED_SERVICES.has(service) ||
-    message.length < 20 ||
-    consent !== "accepted"
+    !isServiceId(service) ||
+    message.length < 10 ||
+    !consent ||
+    !isLocale(locale) ||
+    (page && !PAGE_IDS.has(page))
   ) {
-    return NextResponse.json(
-      { message: "Revise los campos obligatorios e intente nuevamente." },
-      { status: 400 },
-    );
+    return errorResponse("INVALID_FORM", 400);
+  }
+
+  const rateLimit = consumeRateLimit(getRateLimitKey(request));
+
+  if (rateLimit.limited) {
+    return errorResponse("RATE_LIMITED", 429, {
+      "Retry-After": String(rateLimit.retryAfterSeconds),
+    });
   }
 
   const smtpHost = process.env.SMTP_HOST;
@@ -144,16 +444,11 @@ export async function POST(request: NextRequest) {
     !smtpHost ||
     !Number.isInteger(smtpPort) ||
     smtpPort <= 0 ||
+    smtpPort > 65_535 ||
     !smtpFrom ||
     Boolean(smtpUser) !== Boolean(smtpPass)
   ) {
-    return NextResponse.json(
-      {
-        message:
-          "El canal de correo está en configuración. Puede escribirnos por WhatsApp.",
-      },
-      { status: 503 },
-    );
+    return errorResponse("SMTP_UNAVAILABLE", 503);
   }
 
   const transporter = nodemailer.createTransport({
@@ -172,12 +467,19 @@ export async function POST(request: NextRequest) {
     socketTimeout: 15_000,
   });
 
+  const serviceLabel = SERVICE_LABELS[service][locale];
   const safe = {
     name: escapeHtml(name),
-    company: escapeHtml(company || "No indicada"),
+    company: escapeHtml(
+      company || (locale === "es" ? "No indicada" : "Not provided"),
+    ),
     email: escapeHtml(email),
-    phone: escapeHtml(phone || "No indicado"),
-    service: escapeHtml(service),
+    phone: escapeHtml(
+      phone || (locale === "es" ? "No indicado" : "Not provided"),
+    ),
+    service: escapeHtml(serviceLabel),
+    locale: escapeHtml(locale.toUpperCase()),
+    page: escapeHtml(page || "contact"),
     message: escapeHtml(message).replace(/\n/g, "<br />"),
   };
 
@@ -186,7 +488,7 @@ export async function POST(request: NextRequest) {
       from: smtpFrom,
       to: contactTo,
       replyTo: email,
-      subject: `[SOSDEV Web] ${service} — ${name}`,
+      subject: `[SOSDEV Web] ${serviceLabel} — ${name}`,
       text: [
         "Nueva consulta desde sosdev.com.co",
         "",
@@ -194,7 +496,9 @@ export async function POST(request: NextRequest) {
         `Empresa: ${company || "No indicada"}`,
         `Correo: ${email}`,
         `Teléfono: ${phone || "No indicado"}`,
-        `Servicio: ${service}`,
+        `Servicio: ${serviceLabel} (${service})`,
+        `Idioma: ${locale.toUpperCase()}`,
+        `Página de origen: ${page || "contact"}`,
         "",
         "Mensaje:",
         message,
@@ -210,6 +514,8 @@ export async function POST(request: NextRequest) {
               <tr><td style="padding:8px 12px;color:#78958b">Correo</td><td style="padding:8px 12px">${safe.email}</td></tr>
               <tr><td style="padding:8px 12px;color:#78958b">Teléfono</td><td style="padding:8px 12px">${safe.phone}</td></tr>
               <tr><td style="padding:8px 12px;color:#78958b">Interés</td><td style="padding:8px 12px">${safe.service}</td></tr>
+              <tr><td style="padding:8px 12px;color:#78958b">Idioma</td><td style="padding:8px 12px">${safe.locale}</td></tr>
+              <tr><td style="padding:8px 12px;color:#78958b">Página</td><td style="padding:8px 12px">${safe.page}</td></tr>
             </table>
             <div style="margin-top:24px;padding:20px;border-radius:12px;background:#081713;color:#d9e8e2;font-size:14px;line-height:1.7">
               ${safe.message}
@@ -220,16 +526,11 @@ export async function POST(request: NextRequest) {
       `,
     });
 
-    return NextResponse.json({
-      message: "Mensaje enviado. Nuestro equipo se pondrá en contacto pronto.",
+    return successResponse();
+  } catch (error) {
+    console.error("[contact] SMTP send failed", {
+      code: getSmtpErrorCode(error),
     });
-  } catch {
-    return NextResponse.json(
-      {
-        message:
-          "No fue posible enviar el mensaje en este momento. Puede escribirnos por WhatsApp.",
-      },
-      { status: 502 },
-    );
+    return errorResponse("SEND_FAILED", 502);
   }
 }
