@@ -599,7 +599,7 @@ export const pricingContent = {
   },
 };
 
-export const faqContent = {
+export const faqContentLegacy = {
   es: {
     eyebrow: "Preguntas frecuentes",
     title: "Respuestas útiles antes de invertir en software.",
@@ -767,6 +767,319 @@ export const faqContent = {
     ],
     note: "Last reviewed: August 2026. We review this information when the services, prices, or platforms mentioned change.",
     ctaTitle: "Does your question depend on a specific case?",
+  },
+};
+
+export const faqContent = {
+  es: {
+    eyebrow: "Preguntas frecuentes",
+    title: "Respuestas claras sobre software y aplicaciones web.",
+    description:
+      "Priorizamos las preguntas que más se repiten al buscar desarrollo de software, aplicaciones web y páginas web en Medellín y Colombia. Respondemos desde el alcance real de SOSDEV, sin promesas genéricas.",
+    clusters: [
+      {
+        id: "software-medida",
+        title: "Desarrollo de software a medida",
+        items: [
+          {
+            q: "¿Qué es el desarrollo de software a medida y cuándo conviene?",
+            a: "Es la construcción de una solución alrededor de los procesos, usuarios y datos de una empresa. Conviene cuando una herramienta genérica obliga a trabajar con limitaciones, cuando hay información dispersa o cuando se necesita integrar sistemas existentes. En SOSDEV comenzamos por validar si una solución a medida realmente aporta valor antes de construirla.",
+          },
+          {
+            q: "¿Cuánto cuesta desarrollar software a medida en Colombia?",
+            a: "El costo depende de módulos, usuarios, integraciones, seguridad, datos, diseño, pruebas y operación. Nuestra referencia publicada para una aplicación web o MVP comienza en $6.000.000 COP; una solución empresarial con más alcance se cotiza después de entender el proceso y sus restricciones.",
+          },
+          {
+            q: "¿Cuánto tiempo tarda un desarrollo de software?",
+            a: "Una primera versión depende del alcance y de la disponibilidad de decisiones, contenido, accesos e integraciones. En lugar de prometer una fecha sin diagnóstico, definimos una primera entrega verificable, hitos, dependencias y criterios de aceptación en la cotización.",
+          },
+          {
+            q: "¿Cómo es el proceso de desarrollo de software con SOSDEV?",
+            a: "Comprendemos el objetivo, levantamos requisitos, priorizamos una primera versión, definimos arquitectura y experiencia, desarrollamos, probamos y desplegamos. Documentamos entregables, responsables, soporte y costos recurrentes para que la solución pueda mantenerse después de la entrega.",
+          },
+          {
+            q: "¿Quién conserva el código, las cuentas y los datos?",
+            a: "La propiedad y los accesos deben quedar explícitos en la cotización y el acuerdo comercial. Recomendamos que la empresa conserve sus dominios, cuentas de nube, repositorios y datos, con permisos administrados de forma segura. SOSDEV no presenta una transferencia de propiedad como incluida si no se acuerda expresamente.",
+          },
+        ],
+      },
+      {
+        id: "aplicaciones-web",
+        title: "Aplicaciones web",
+        items: [
+          {
+            q: "¿Qué diferencia hay entre una página web y una aplicación web?",
+            a: "Una página web comunica información y orienta al visitante; una aplicación web permite iniciar sesión, gestionar datos, ejecutar procesos o trabajar con roles. SOSDEV puede evaluar desde una landing page hasta un panel, portal, cotizador o MVP según el problema que deba resolver.",
+          },
+          {
+            q: "¿Pueden desarrollar una aplicación web para una empresa?",
+            a: "Sí. Podemos evaluar portales, paneles, herramientas internas, formularios guiados, cotizadores y flujos conectados con sistemas existentes. Primero definimos usuarios, permisos, datos, integraciones y operación para evitar construir funcionalidades que no resuelvan una necesidad concreta.",
+          },
+          {
+            q: "¿Una aplicación web funciona en celular y computador?",
+            a: "Diseñamos interfaces responsivas para los tamaños de pantalla definidos en el alcance. Si la operación requiere capacidades específicas del dispositivo, notificaciones avanzadas o trabajo sin conexión, evaluamos una PWA o una aplicación móvil como una decisión separada.",
+          },
+          {
+            q: "¿Pueden integrar una aplicación web con CRM, ERP, pagos o WhatsApp?",
+            a: "Podemos evaluar integraciones mediante APIs, webhooks o conectores disponibles. La viabilidad depende de la documentación, límites, permisos, costos y políticas de cada proveedor. WhatsApp, CRM, pagos, inventario y facturación se especifican por separado en la cotización.",
+          },
+          {
+            q: "¿Qué seguridad necesita una aplicación web?",
+            a: "Como mínimo se deben considerar autenticación, autorización por roles, validación de entradas, protección de secretos, copias de seguridad, registros, actualizaciones y manejo responsable de datos personales. La profundidad se define según el riesgo y el tipo de información; no afirmamos cumplimiento legal o certificación sin una evaluación específica.",
+          },
+        ],
+      },
+      {
+        id: "medellin-colombia",
+        title: "Páginas web en Medellín y Colombia",
+        items: [
+          {
+            q: "¿Dónde contratar desarrollo de software o páginas web en Medellín?",
+            a: "SOSDEV opera desde Colombia y atiende de forma remota por correo y WhatsApp. Para elegir proveedor, compare alcance, experiencia demostrable, acceso a cuentas, soporte, seguridad, rendimiento y costos recurrentes, no solo la ubicación o el precio inicial.",
+          },
+          {
+            q: "¿SOSDEV desarrolla páginas web para negocios de Medellín?",
+            a: "Sí, podemos evaluar páginas corporativas, landings, ecommerce y aplicaciones para empresas de Medellín y otras ciudades. La estrategia local debe incluir la información real del negocio, zonas atendidas, contacto, oferta y medición; no creamos una dirección física ficticia ni garantizamos posiciones.",
+          },
+          {
+            q: "¿Cuánto cuesta una página web profesional en Medellín?",
+            a: "Nuestra referencia para una landing page comienza en $750.000 COP y una tienda online en $2.500.000 COP. Son valores iniciales y pueden cambiar por contenido, páginas, diseño, catálogo, pagos, integraciones, SEO, soporte e impuestos. La cotización final requiere revisar el alcance.",
+          },
+          {
+            q: "¿Pueden trabajar con clientes de Perú, Paraguay u otros países?",
+            a: "Podemos evaluar trabajo remoto para Colombia, Perú, Paraguay y otros mercados. Antes de cotizar validamos idioma, moneda, impuestos, pasarelas, envíos, privacidad, horarios e integraciones locales. No afirmamos oficinas ni asesoría fiscal fuera de Colombia.",
+          },
+        ],
+      },
+      {
+        id: "ecommerce-ventas",
+        title: "Ecommerce y ventas",
+        items: [
+          {
+            q: "¿Cuánto cuesta crear una tienda online en Colombia?",
+            a: "Nuestra referencia de entrada para ecommerce es $2.500.000 COP. El valor puede cambiar por cantidad y variantes de productos, pagos, inventario, envíos, impuestos, facturación, migración, roles, diseño e integraciones. Comparamos plataformas y alcance antes de recomendar una implementación.",
+          },
+          {
+            q: "¿Qué necesita una tienda online para vender?",
+            a: "Necesita catálogo, información de producto, carrito, checkout, medios de pago, reglas de envío, inventario, políticas, atención y medición. También hay que definir quién administra pedidos, devoluciones, contenido y soporte. SOSDEV puede organizar estos flujos, pero la operación comercial sigue siendo responsabilidad de la empresa.",
+          },
+          {
+            q: "¿Pueden conectar ecommerce con pagos, inventario y facturación?",
+            a: "Sí, podemos evaluar las conexiones disponibles para el país y la plataforma elegida. Confirmamos previamente comisiones, credenciales, webhooks, impuestos, facturación, inventario y límites del proveedor; ninguna pasarela o integración se considera incluida sin especificarla.",
+          },
+          {
+            q: "¿Una página web garantiza más ventas?",
+            a: "No. Una solución puede mejorar claridad, velocidad, confianza y seguimiento, pero las ventas dependen también de oferta, precio, tráfico, atención, logística y mercado. No prometemos resultados comerciales ni gestionamos publicidad salvo un acuerdo independiente.",
+          },
+        ],
+      },
+      {
+        id: "ia-plataformas",
+        title: "IA, plataformas y decisiones técnicas",
+        items: [
+          {
+            q: "¿Se puede usar inteligencia artificial en el desarrollo de software?",
+            a: "Sí. La IA puede apoyar análisis, prototipos, búsqueda, clasificación, extracción de datos, asistentes y automatizaciones. Mantenemos revisión humana, pruebas, controles de privacidad y límites de costo; no presentamos una salida generada por IA como correcta sin validarla.",
+          },
+          {
+            q: "¿Qué plataforma es mejor para crear una página web sin programar?",
+            a: "Depende del objetivo. Wix, Squarespace o Webflow pueden servir para sitios informativos rápidos; WordPress ofrece un ecosistema editorial amplio; Shopify o WooCommerce se enfocan en ecommerce; Next.js conviene cuando se necesitan rendimiento e integraciones a medida. Comparamos costo total, propiedad, mantenimiento y escalabilidad.",
+          },
+          {
+            q: "¿Qué tecnología recomienda SOSDEV para una aplicación web?",
+            a: "No imponemos una tecnología por moda. Elegimos según requisitos, equipo que mantendrá la solución, integraciones, rendimiento, seguridad, presupuesto y evolución esperada. Para una solución concreta documentamos la arquitectura y sus compromisos antes de implementarla.",
+          },
+          {
+            q: "¿Pueden migrar una página o aplicación existente?",
+            a: "Podemos evaluar migraciones de contenido, CMS, datos, dominios o componentes. Antes de mover información revisamos dependencias, copias de seguridad, redirecciones, integraciones, permisos y plan de reversa. No iniciamos una migración sin acceso autorizado y respaldo verificable.",
+          },
+        ],
+      },
+      {
+        id: "seo-rendimiento-operacion",
+        title: "SEO, rendimiento y operación",
+        items: [
+          {
+            q: "¿El desarrollo de una página web incluye SEO?",
+            a: "Incluimos fundamentos técnicos según el alcance: estructura rastreable, títulos, descripciones, contenido claro, enlaces internos, datos estructurados cuando aplican, sitemap y rendimiento. El posicionamiento no se puede garantizar y requiere contenido útil, autoridad, medición y trabajo continuo.",
+          },
+          {
+            q: "¿Cómo aparecer en Google y en respuestas de inteligencia artificial?",
+            a: "Google recomienda contenido útil, confiable y creado para personas, además de una estructura rastreable y una buena experiencia. SOSDEV puede preparar la base técnica y el contenido de servicios, pero la indexación, las respuestas generativas y las posiciones no están garantizadas; se deben medir con Search Console y analítica.",
+          },
+          {
+            q: "¿Cómo hacen una página web rápida?",
+            a: "Reducimos dependencias innecesarias, optimizamos imágenes, cuidamos el JavaScript, usamos renderizado apropiado, medimos en dispositivos reales y revisamos Core Web Vitals. La velocidad final también depende del contenido, hosting, terceros, red y cambios posteriores.",
+          },
+          {
+            q: "¿Quién mantiene la página o aplicación después de publicarla?",
+            a: "Definimos en cada cotización quién administra contenido, actualizaciones, infraestructura, copias, monitoreo, incidentes y nuevas funcionalidades. SOSDEV puede evaluar soporte y mantenimiento, pero no se entiende incluido si no aparece explícitamente en el acuerdo.",
+          },
+          {
+            q: "¿Qué hosting, dominio y certificado necesita una página web?",
+            a: "Toda solución pública necesita un dominio, alojamiento y HTTPS; una aplicación puede requerir además base de datos, almacenamiento, correo, copias y monitoreo. Podemos diseñar y desplegar la infraestructura, pero los servicios recurrentes y sus cuentas deben quedar identificados y presupuestados.",
+          },
+        ],
+      },
+    ],
+    note:
+      "Investigación y revisión: 14 de agosto de 2026. Las preguntas se agruparon por intención a partir de resultados actuales sobre desarrollo de software, aplicaciones web, páginas web en Medellín, precios, plataformas, SEO y operación. Las consultas y respuestas deben revisarse cuando cambien los servicios o el mercado.",
+    ctaTitle: "¿Su caso necesita una respuesta más precisa?",
+  },
+  en: {
+    eyebrow: "Frequently asked questions",
+    title: "Clear answers about software and web applications.",
+    description:
+      "We prioritize recurring questions about software development, web applications, and websites in Medellin and Colombia. We answer from SOSDEV's actual scope, without generic promises.",
+    clusters: [
+      {
+        id: "custom-software",
+        title: "Custom software development",
+        items: [
+          {
+            q: "What is custom software development and when is it useful?",
+            a: "It is building a solution around a company's processes, users, and data. It makes sense when generic tools create limitations, information is scattered, or existing systems must work together. At SOSDEV we first validate whether custom software creates enough value before building it.",
+          },
+          {
+            q: "How much does custom software development cost in Colombia?",
+            a: "Cost depends on modules, users, integrations, security, data, design, testing, and operations. Our published starting reference for a web application or MVP is COP 6,000,000; larger business solutions are quoted after we understand the process and constraints.",
+          },
+          {
+            q: "How long does software development take?",
+            a: "A first release depends on scope and on the availability of decisions, content, access, and integrations. Instead of promising a date without discovery, we define a verifiable first release, milestones, dependencies, and acceptance criteria in the proposal.",
+          },
+          {
+            q: "What is SOSDEV's software development process?",
+            a: "We understand the goal, gather requirements, prioritize a first release, define architecture and experience, build, test, and deploy. Deliverables, responsibilities, support, and recurring costs are documented so the solution can be maintained after launch.",
+          },
+          {
+            q: "Who owns the code, accounts, and data?",
+            a: "Ownership and access should be explicit in the commercial agreement. We recommend that the business keeps its domains, cloud accounts, repositories, and data, with permissions managed securely. SOSDEV does not describe ownership transfer as included unless it is expressly agreed.",
+          },
+        ],
+      },
+      {
+        id: "web-applications",
+        title: "Web applications",
+        items: [
+          {
+            q: "What is the difference between a website and a web application?",
+            a: "A website communicates information and guides visitors; a web application lets people sign in, manage data, run processes, or work with roles. SOSDEV can assess anything from a landing page to a dashboard, portal, quote tool, or MVP based on the problem to solve.",
+          },
+          {
+            q: "Can you develop a web application for a business?",
+            a: "Yes. We can assess portals, dashboards, internal tools, guided forms, quote tools, and workflows connected to existing systems. We first define users, permissions, data, integrations, and operations so the build addresses a real need.",
+          },
+          {
+            q: "Will a web application work on phones and computers?",
+            a: "We design responsive interfaces for the screen sizes included in scope. If the operation needs device-specific capabilities, advanced notifications, or offline work, we assess a PWA or mobile application as a separate decision.",
+          },
+          {
+            q: "Can you integrate a web application with a CRM, ERP, payments, or WhatsApp?",
+            a: "We can assess integrations through APIs, webhooks, or available connectors. Feasibility depends on each provider's documentation, limits, permissions, costs, and policies. WhatsApp, CRM, payments, inventory, and invoicing are scoped separately.",
+          },
+          {
+            q: "What security does a web application need?",
+            a: "At minimum, consider authentication, role authorization, input validation, secret protection, backups, logs, updates, and responsible handling of personal data. Depth depends on risk and information type; we do not claim legal compliance or certification without a specific assessment.",
+          },
+        ],
+      },
+      {
+        id: "medellin-colombia",
+        title: "Websites in Medellin and Colombia",
+        items: [
+          {
+            q: "Where can I hire software or web development in Medellin?",
+            a: "SOSDEV operates from Colombia and works remotely by email and WhatsApp. When choosing a provider, compare scope, demonstrated experience, account access, support, security, performance, and recurring costs, not just location or the initial price.",
+          },
+          {
+            q: "Does SOSDEV build websites for Medellin businesses?",
+            a: "Yes, we can assess corporate websites, landing pages, ecommerce, and applications for businesses in Medellin and other cities. Local strategy should use real business information, service areas, contact details, offer, and measurement; we do not create a fictional physical address or guarantee rankings.",
+          },
+          {
+            q: "How much does a professional website cost in Medellin?",
+            a: "Our starting reference for a landing page is COP 750,000 and for an online store COP 2,500,000. Content, pages, design, catalog, payments, integrations, SEO, support, and taxes can change the value. A final quote requires reviewing scope.",
+          },
+          {
+            q: "Can you work with clients in Peru, Paraguay, or other countries?",
+            a: "We can assess remote work for Colombia, Peru, Paraguay, and other markets. Before quoting, we validate language, currency, taxes, gateways, shipping, privacy, time zones, and local integrations. We do not claim offices or tax advice outside Colombia.",
+          },
+        ],
+      },
+      {
+        id: "ecommerce-sales",
+        title: "Ecommerce and sales",
+        items: [
+          {
+            q: "How much does it cost to create an online store in Colombia?",
+            a: "Our ecommerce starting reference is COP 2,500,000. Product quantity and variants, payments, inventory, shipping, taxes, invoicing, migration, roles, design, and integrations can change the value. We compare platforms and scope before recommending an implementation.",
+          },
+          {
+            q: "What does an online store need to sell?",
+            a: "It needs a catalog, product information, cart, checkout, payment methods, shipping rules, inventory, policies, support, and measurement. It is also important to define who manages orders, returns, content, and support. SOSDEV can organize these flows, while commercial operations remain the business's responsibility.",
+          },
+          {
+            q: "Can you connect ecommerce with payments, inventory, and invoicing?",
+            a: "We can assess available connections for the selected country and platform. We confirm commissions, credentials, webhooks, taxes, invoicing, inventory, and provider limits first; no gateway or integration is included unless specified.",
+          },
+          {
+            q: "Does a website guarantee more sales?",
+            a: "No. A solution can improve clarity, speed, trust, and follow-up, but sales also depend on the offer, price, traffic, service, logistics, and market. We do not promise commercial results or manage advertising unless separately agreed.",
+          },
+        ],
+      },
+      {
+        id: "ai-platforms",
+        title: "AI, platforms, and technical choices",
+        items: [
+          {
+            q: "Can artificial intelligence be used in software development?",
+            a: "Yes. AI can support analysis, prototypes, search, classification, data extraction, assistants, and automation. We keep human review, testing, privacy controls, and cost limits; we do not treat generated output as correct without validation.",
+          },
+          {
+            q: "What is the best no-code platform for a website?",
+            a: "It depends on the goal. Wix, Squarespace, or Webflow can suit quick informational sites; WordPress offers a broad editorial ecosystem; Shopify or WooCommerce focus on ecommerce; Next.js fits custom performance and integrations. We compare total cost, ownership, maintenance, and scalability.",
+          },
+          {
+            q: "Which technology does SOSDEV recommend for a web application?",
+            a: "We do not impose technology because it is fashionable. We choose according to requirements, the team maintaining it, integrations, performance, security, budget, and expected evolution. For a specific solution, we document architecture and trade-offs before implementation.",
+          },
+          {
+            q: "Can you migrate an existing website or application?",
+            a: "We can assess migrations of content, CMS, data, domains, or components. Before moving information we review dependencies, backups, redirects, integrations, permissions, and a rollback plan. We do not start without authorized access and a verifiable backup.",
+          },
+        ],
+      },
+      {
+        id: "seo-performance-operations",
+        title: "SEO, performance, and operations",
+        items: [
+          {
+            q: "Does web development include SEO?",
+            a: "We include technical foundations according to scope: crawlable structure, titles, descriptions, clear content, internal links, applicable structured data, sitemap, and performance. Rankings cannot be guaranteed and require useful content, authority, measurement, and ongoing work.",
+          },
+          {
+            q: "How can a website appear in Google and AI answers?",
+            a: "Google recommends useful, trustworthy, people-first content, a crawlable structure, and a good page experience. SOSDEV can prepare the technical foundation and service content, but indexing, generative answers, and rankings are not guaranteed; they should be measured with Search Console and analytics.",
+          },
+          {
+            q: "How do you make a website fast?",
+            a: "We reduce unnecessary dependencies, optimize images, control JavaScript, use appropriate rendering, measure on real devices, and review Core Web Vitals. Final speed also depends on content, hosting, third parties, network, and later changes.",
+          },
+          {
+            q: "Who maintains the website or application after launch?",
+            a: "Each quote defines who manages content, updates, infrastructure, backups, monitoring, incidents, and new features. SOSDEV can assess support and maintenance, but they are not included unless explicitly stated.",
+          },
+          {
+            q: "What hosting, domain, and certificate does a website need?",
+            a: "Every public solution needs a domain, hosting, and HTTPS; an application may also need a database, storage, email, backups, and monitoring. We can design and deploy infrastructure, while recurring services and account ownership should be identified and budgeted.",
+          },
+        ],
+      },
+    ],
+    note:
+      "Research and review: August 14, 2026. Questions were grouped by intent from current results about software development, web applications, websites in Medellin, pricing, platforms, SEO, and operations. Review this content when services or the market change.",
+    ctaTitle: "Does your case need a more precise answer?",
   },
 };
 
