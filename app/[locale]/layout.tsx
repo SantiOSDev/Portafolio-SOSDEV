@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   publisher: "SOSDEV",
   formatDetection: { email: false, address: false, telephone: false },
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico" }],
-    shortcut: "/favicon.ico",
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml", sizes: "any" }],
+    shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
 };
 
